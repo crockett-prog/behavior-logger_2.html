@@ -382,6 +382,16 @@
     </div>
 
     <div class="card">
+      <h2>Level <span style="text-transform:none; font-weight:400; opacity:.7;">(optional)</span></h2>
+      <select id="level-input">
+        <option value="">— Select a level —</option>
+        <option value="Level 1">Level 1</option>
+        <option value="Level 2">Level 2</option>
+        <option value="Level 3">Level 3</option>
+      </select>
+    </div>
+
+    <div class="card">
       <h2>Notes <span style="text-transform:none; font-weight:400; opacity:.7;">(optional)</span></h2>
       <textarea id="notes-input" placeholder="Add any context before submitting…" rows="2" style="width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text); font-family:var(--font-body); font-size:15px; padding:11px 13px; border-radius:10px; outline:none; resize:vertical;"></textarea>
     </div>
@@ -456,6 +466,10 @@
             <label>Notes field (entry ID)</label>
             <input type="text" id="setting-notes-entry">
           </div>
+          <div>
+            <label>Level field (entry ID)</label>
+            <input type="text" id="setting-level-entry">
+          </div>
           <button class="btn btn-ghost" id="save-settings">Save Connection Settings</button>
         </div>
       </details>
@@ -482,7 +496,8 @@ const DEFAULTS = {
     url: 'https://docs.google.com/forms/d/e/1FAIpQLSeLtNO_400JsFztqruF5Dywuy1Z5rosyV3FQIFPQoYMwlzUbw/formResponse',
     nameEntry: 'entry.278854547',
     behaviorEntry: 'entry.190696965',
-    notesEntry: 'entry.805969500'
+    notesEntry: 'entry.805969500',
+    levelEntry: 'entry.191821192'
   },
   quickButtons: []
 };
@@ -509,6 +524,7 @@ async function loadConfig(){
       config = data;
       if(!config.quickButtons) config.quickButtons = [];
       if(config.settings && !config.settings.notesEntry) config.settings.notesEntry = 'entry.805969500';
+      if(config.settings && !config.settings.levelEntry) config.settings.levelEntry = 'entry.191821192';
     }else{
       config = JSON.parse(JSON.stringify(DEFAULTS));
       await saveConfig();
@@ -555,6 +571,7 @@ function renderAll(){
   document.getElementById('setting-name-entry').value = config.settings.nameEntry;
   document.getElementById('setting-behavior-entry').value = config.settings.behaviorEntry;
   document.getElementById('setting-notes-entry').value = config.settings.notesEntry || '';
+  document.getElementById('setting-level-entry').value = config.settings.levelEntry || '';
 }
 
 function renderStudentList(){
@@ -620,12 +637,16 @@ function renderQuickButtons(){
 
 function logDirect(student, behavior){
   const notes = document.getElementById('notes-input') ? document.getElementById('notes-input').value.trim() : '';
+  const level = document.getElementById('level-input') ? document.getElementById('level-input').value : '';
 
   const url = new URL(config.settings.url);
   url.searchParams.set(config.settings.nameEntry, student);
   url.searchParams.set(config.settings.behaviorEntry, behavior.label);
   if(config.settings.notesEntry && notes){
     url.searchParams.set(config.settings.notesEntry, notes);
+  }
+  if(config.settings.levelEntry && level){
+    url.searchParams.set(config.settings.levelEntry, level);
   }
   url.searchParams.set('usp', 'pp_url');
   url.searchParams.set('submit', 'Submit');
@@ -641,6 +662,8 @@ function logDirect(student, behavior){
 
   const notesBox = document.getElementById('notes-input');
   if(notesBox) notesBox.value = '';
+  const levelBox = document.getElementById('level-input');
+  if(levelBox) levelBox.value = '';
 }
 
 function currentStudent(){
@@ -840,6 +863,7 @@ document.getElementById('save-settings').onclick = async ()=>{
   config.settings.nameEntry = document.getElementById('setting-name-entry').value.trim();
   config.settings.behaviorEntry = document.getElementById('setting-behavior-entry').value.trim();
   config.settings.notesEntry = document.getElementById('setting-notes-entry').value.trim();
+  config.settings.levelEntry = document.getElementById('setting-level-entry').value.trim();
   await saveConfig();
   showToast('Connection settings saved');
 };
@@ -848,4 +872,3 @@ loadConfig();
 </script>
 </body>
 </html>
-
